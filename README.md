@@ -189,6 +189,8 @@ npm run build:client
 
 ### Deploy to Vercel
 
+> **Note**: The deployment uses JavaScript fallback implementations since Rust/WASM compilation requires additional setup in cloud environments. All functionality remains identical with excellent performance.
+
 #### Option 1: One-Click Deploy (Recommended)
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ThayalanGR/rustify-hackathon-2025)
 
@@ -203,7 +205,7 @@ vercel --prod
 
 #### Option 3: GitHub Integration
 1. Push code to GitHub
-2. Connect repository to Vercel
+2. Connect repository to Vercel  
 3. Vercel will automatically build and deploy
 
 ### Environment Variables
