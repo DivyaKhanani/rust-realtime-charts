@@ -86,7 +86,7 @@ function App() {
     <div className="app">
       <header className="app-header">
         <h1>🦀 Rust + WebAssembly + React</h1>
-        <p className="subtitle">High-Performance Data Processing with Rust compiled to WebAssembly</p>
+        <p className="subtitle">High-Performance Data Processing with Rust + WebAssembly</p>
         <button onClick={handleGreeting} className="greet-btn">
           👋 Test WASM Module
         </button>

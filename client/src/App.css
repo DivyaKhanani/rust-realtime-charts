@@ -177,8 +177,9 @@ body {
 }
 
 .greet-btn {
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  color: var(--text-on-primary);
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  color: var(--primary);
   padding: 0.75rem 1.5rem;
   border-radius: var(--radius-lg);
   cursor: pointer;
@@ -188,13 +189,14 @@ body {
   backdrop-filter: blur(10px);
   position: relative;
   z-index: 1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .greet-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 1);
+  border-color: rgba(255, 255, 255, 0.8);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .greet-btn:active {
