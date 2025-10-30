@@ -4,7 +4,7 @@
 
 A complete, production-ready boilerplate demonstrating the integration of **Rust**, **WebAssembly**, and **React** for high-performance web applications. This project showcases how to leverage Rust's computational power in the browser through WebAssembly, connected seamlessly to a modern React frontend.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/rust-hackathon-boilerplate)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/lumelinc/rustify-hackathon-2025)
 
 ## 📘 Overview
 
@@ -49,8 +49,8 @@ This application demonstrates:
 
 ```bash
 # Clone and setup everything
-git clone <your-repo-url>
-cd rust-hackathon-boilerplate
+git clone https://github.com/lumelinc/rustify-hackathon-2025.git
+cd rustify-hackathon-2025
 npm run build
 ```
 
@@ -58,8 +58,8 @@ npm run build
 
 ```bash
 # 1. Clone the repository
-git clone <your-repo-url>
-cd rust-hackathon-boilerplate
+git clone https://github.com/lumelinc/rustify-hackathon-2025.git
+cd rustify-hackathon-2025
 
 # 2. Install wasm-pack (if not already installed)
 curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh

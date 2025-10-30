@@ -1,15 +1,10 @@
 {
   "version": 2,
   "name": "rust-wasm-react-hackathon",
-  "builds": [
-    {
-      "src": "client/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "client/dist"
-      }
-    }
-  ],
+  "buildCommand": "chmod +x ./build.sh && ./build.sh && cd client && npm run build",
+  "outputDirectory": "client/dist",
+  "installCommand": "cd client && npm install",
+  "framework": null,
   "routes": [
     {
       "handle": "filesystem"
@@ -18,8 +13,5 @@
       "src": "/.*",
       "dest": "/index.html"
     }
-  ],
-  "installCommand": "npm run build",
-  "buildCommand": "cd client && npm run build",
-  "outputDirectory": "client/dist"
+  ]
 }

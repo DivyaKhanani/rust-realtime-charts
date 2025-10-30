@@ -211,7 +211,7 @@ function App() {
           Built with ❤️ using <strong>Rust</strong> → <strong>WebAssembly</strong> → <strong>React</strong>
         </p>
         <p>
-          <a href="https://github.com" target="_blank" rel="noopener noreferrer">
+          <a href="https://github.com/lumelinc/rustify-hackathon-2025" target="_blank" rel="noopener noreferrer">
             View on GitHub
           </a>
         </p>
