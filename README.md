@@ -187,29 +187,31 @@ npm run build:wasm
 npm run build:client
 ```
 
-### Deploy to Vercel
+### 🆓 Free Deployment Options
 
-#### Option 1: Vercel CLI
-```bash
-# Install Vercel CLI
-npm i -g vercel
+#### Option 1: Netlify (Recommended)
+1. **Sign up** at [netlify.com](https://netlify.com)
+2. **Connect GitHub** repository
+3. **Deploy** (settings auto-detected from `netlify.toml`)
+4. ✅ **Free tier**: 100GB bandwidth, private repos supported
 
-# Deploy
-vercel --prod
-```
+#### Option 2: GitHub Pages (Completely Free)
+1. **Enable GitHub Pages** in repository settings
+2. **Select source**: GitHub Actions
+3. **Push to main branch** - automatic deployment via `.github/workflows/deploy.yml`
+4. ✅ **Free**: Unlimited for public/private repos
 
-#### Option 2: GitHub Integration
-1. Push code to GitHub
-2. Connect repository to Vercel
-3. Vercel will automatically build and deploy
+#### Option 3: Render
+1. **Sign up** at [render.com](https://render.com)
+2. **Connect GitHub** repository  
+3. **Deploy** as static site
+4. ✅ **Free tier**: 750 hours/month, custom domains
 
-#### Option 3: Manual Upload
-```bash
-# Build first
-npm run build:client
-
-# Upload the client/dist folder to any static hosting
-```
+#### Option 4: Railway
+1. **Sign up** at [railway.app](https://railway.app)
+2. **Deploy from GitHub** 
+3. **$5 monthly credit** (usually sufficient)
+4. ✅ **Great performance** and easy setup
 
 ### Environment Variables
 
