@@ -1,8 +1,8 @@
-# 🦀 Rust + WebAssembly + React Hackathon Boilerplate
+## 🎯 Hackathon Boilerplate: Rust + WebAssembly + React
 
-> **High-Performance Data Processing with Rust compiled to WebAssembly**
+A modern, high-performance boilerplate for hackathons combining Rust's computational power with React's UI capabilities. Build fast, deploy faster!
 
-A complete, production-ready boilerplate demonstrating the integration of **Rust**, **WebAssembly**, and **React** for high-performance web applications. This project showcases how to leverage Rust's computational power in the browser through WebAssembly, connected seamlessly to a modern React frontend.
+### 🚀 [Live Demo](https://rust-wasm-react-hackathon-qe5ek4r8d-thayalangrs-projects.vercel.app)
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ThayalanGR/rustify-hackathon-2025)
 
