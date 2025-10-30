@@ -3,7 +3,7 @@
 ## Quick Deploy to Vercel
 
 ### Option 1: One-Click Deploy (Recommended)
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/lumelinc/rustify-hackathon-2025)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ThayalanGR/rustify-hackathon-2025)
 
 Click the button above to deploy directly to Vercel.
 
@@ -21,7 +21,7 @@ vercel --prod
 1. Go to [vercel.com](https://vercel.com)
 2. Sign up/Login with GitHub
 3. Click "New Project"
-4. Import `lumelinc/rustify-hackathon-2025`
+4. 3. **Import** `ThayalanGR/rustify-hackathon-2025`
 5. Configure build settings (auto-detected from vercel.json)
 6. Deploy!
 

@@ -4,7 +4,7 @@
 
 A complete, production-ready boilerplate demonstrating the integration of **Rust**, **WebAssembly**, and **React** for high-performance web applications. This project showcases how to leverage Rust's computational power in the browser through WebAssembly, connected seamlessly to a modern React frontend.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/lumelinc/rustify-hackathon-2025)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ThayalanGR/rustify-hackathon-2025)
 
 ## 📘 Overview
 
@@ -49,7 +49,7 @@ This application demonstrates:
 
 ```bash
 # Clone and setup everything
-git clone https://github.com/lumelinc/rustify-hackathon-2025.git
+git clone https://github.com/ThayalanGR/rustify-hackathon-2025.git
 cd rustify-hackathon-2025
 npm run build
 ```
@@ -58,7 +58,7 @@ npm run build
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/lumelinc/rustify-hackathon-2025.git
+git clone https://github.com/ThayalanGR/rustify-hackathon-2025.git
 cd rustify-hackathon-2025
 
 # 2. Install wasm-pack (if not already installed)
@@ -187,31 +187,24 @@ npm run build:wasm
 npm run build:client
 ```
 
-### 🆓 Free Deployment Options
+### Deploy to Vercel
 
-#### Option 1: Netlify (Recommended)
-1. **Sign up** at [netlify.com](https://netlify.com)
-2. **Connect GitHub** repository
-3. **Deploy** (settings auto-detected from `netlify.toml`)
-4. ✅ **Free tier**: 100GB bandwidth, private repos supported
+#### Option 1: One-Click Deploy (Recommended)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ThayalanGR/rustify-hackathon-2025)
 
-#### Option 2: GitHub Pages (Completely Free)
-1. **Enable GitHub Pages** in repository settings
-2. **Select source**: GitHub Actions
-3. **Push to main branch** - automatic deployment via `.github/workflows/deploy.yml`
-4. ✅ **Free**: Unlimited for public/private repos
+#### Option 2: Vercel CLI
+```bash
+# Install Vercel CLI
+npm i -g vercel
 
-#### Option 3: Render
-1. **Sign up** at [render.com](https://render.com)
-2. **Connect GitHub** repository  
-3. **Deploy** as static site
-4. ✅ **Free tier**: 750 hours/month, custom domains
+# Deploy
+vercel --prod
+```
 
-#### Option 4: Railway
-1. **Sign up** at [railway.app](https://railway.app)
-2. **Deploy from GitHub** 
-3. **$5 monthly credit** (usually sufficient)
-4. ✅ **Great performance** and easy setup
+#### Option 3: GitHub Integration
+1. Push code to GitHub
+2. Connect repository to Vercel
+3. Vercel will automatically build and deploy
 
 ### Environment Variables
 
