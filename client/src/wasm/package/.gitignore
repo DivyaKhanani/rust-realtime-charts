@@ -1,0 +1,2 @@
+# Include all WASM package files for end users without Rust environment
+# This allows consumers to use pre-built WASM without needing Rust toolchain

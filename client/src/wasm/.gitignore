@@ -1,0 +1,2 @@
+# Keep generated WASM files for end users without Rust environment
+# Only ignore temp/cache files if any
