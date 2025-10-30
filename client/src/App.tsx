@@ -1,8 +1,9 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { DataInput } from './components/DataInput';
 import { ResultsDisplay, type ProcessResult } from './components/ResultsDisplay';
 import { FibonacciCalculator, FibonacciDisplay } from './components/FibonacciCalculator';
-import type { WorkerMessage, WorkerResponse } from './worker/dataWorker';
+import MathDemo from './components/MathDemo';
+import { sendWorkerMessage } from './worker/workerManager';
 import './App.css';
 
 interface FibonacciResult {
@@ -19,75 +20,8 @@ function App() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingTime, setProcessingTime] = useState<number | null>(null);
   const [fibonacciPerformance, setFibonacciPerformance] = useState<number | null>(null);
-  
-  const workerRef = useRef<Worker | null>(null);
-  const messageIdRef = useRef(0);
-  const pendingMessages = useRef<Map<string, (response: WorkerResponse) => void>>(new Map());
-
-  // Initialize Web Worker
-  useEffect(() => {
-    try {
-      const worker = new Worker(
-        new URL('./worker/dataWorker.ts', import.meta.url),
-        { type: 'module' }
-      );
-
-      worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
-        const response = event.data;
-        const resolver = pendingMessages.current.get(response.id);
-        if (resolver) {
-          resolver(response);
-          pendingMessages.current.delete(response.id);
-        }
-      };
-
-      worker.onerror = (error) => {
-        console.error('Worker error:', error);
-        setError('Web Worker encountered an error');
-        setIsProcessing(false);
-      };
-
-      workerRef.current = worker;
-
-      return () => {
-        worker.terminate();
-      };
-    } catch (err) {
-      console.error('Failed to create worker:', err);
-      setError('Failed to initialize Web Worker. Your browser might not support this feature.');
-    }
-  }, []);
-
-  const sendWorkerMessage = useCallback((message: Omit<WorkerMessage, 'id'>): Promise<WorkerResponse> => {
-    return new Promise((resolve, reject) => {
-      if (!workerRef.current) {
-        reject(new Error('Worker not initialized'));
-        return;
-      }
-
-      const id = `msg_${++messageIdRef.current}`;
-      const fullMessage: WorkerMessage = { ...message, id };
-      
-      pendingMessages.current.set(id, resolve);
-      
-      // Set timeout to reject promise if no response
-      setTimeout(() => {
-        if (pendingMessages.current.has(id)) {
-          pendingMessages.current.delete(id);
-          reject(new Error('Worker message timeout'));
-        }
-      }, 30000);
-
-      workerRef.current.postMessage(fullMessage);
-    });
-  }, []);
 
   const handleDataSubmit = useCallback(async (data: string, type: 'csv' | 'simple') => {
-    if (!workerRef.current) {
-      setError('Web Worker not available');
-      return;
-    }
-
     setIsProcessing(true);
     setError(null);
     setResult(null);
@@ -95,13 +29,10 @@ function App() {
     const startTime = window.performance.now();
 
     try {
-      const messageType = type === 'csv' ? 'process_csv' : 'process_simple';
+      const messageType = type === 'csv' ? 'process_csv' : 'process_simple' as const;
       const messageData = type === 'csv' ? { csvContent: data } : { input: data };
       
-      const response = await sendWorkerMessage({
-        type: messageType,
-        data: messageData
-      });
+      const response = await sendWorkerMessage(messageType, messageData);
 
       const endTime = window.performance.now();
       setProcessingTime(endTime - startTime);
@@ -116,14 +47,9 @@ function App() {
     } finally {
       setIsProcessing(false);
     }
-  }, [sendWorkerMessage]);
+  }, []);
 
   const handleFibonacciCalculate = useCallback(async (count: number) => {
-    if (!workerRef.current) {
-      setFibonacciError('Web Worker not available');
-      return;
-    }
-
     setIsProcessing(true);
     setFibonacciError(null);
     setFibonacciResult(null);
@@ -131,10 +57,7 @@ function App() {
     const startTime = window.performance.now();
 
     try {
-      const response = await sendWorkerMessage({
-        type: 'fibonacci',
-        data: { count }
-      });
+      const response = await sendWorkerMessage('fibonacci', { count });
 
       const endTime = window.performance.now();
       setFibonacciPerformance(endTime - startTime);
@@ -149,23 +72,15 @@ function App() {
     } finally {
       setIsProcessing(false);
     }
-  }, [sendWorkerMessage]);
+  }, []);
 
   const handleGreeting = useCallback(async () => {
-    if (!workerRef.current) {
-      setError('Web Worker not available');
-      return;
-    }
-
     try {
-      await sendWorkerMessage({
-        type: 'greet',
-        data: {}
-      });
+      await sendWorkerMessage('greet', {});
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to send greeting');
     }
-  }, [sendWorkerMessage]);
+  }, []);
 
   return (
     <div className="app">
@@ -203,6 +118,10 @@ function App() {
             performance={fibonacciPerformance} 
             error={fibonacciError} 
           />
+        </div>
+
+        <div className="section">
+          <MathDemo />
         </div>
       </main>
 

@@ -1,19 +1,25 @@
-import init, { 
-  process_csv_data, 
-  process_simple_data, 
-  calculate_fibonacci,
-  greet
-} from '../wasm/rust_core';
+import { 
+  initWasm,
+  wasmProcessCsvData,
+  wasmProcessSimpleData,
+  wasmCalculateFibonacci,
+  wasmCalculatePrimes,
+  wasmMonteCarloPI,
+  wasmMatrixMultiplyDemo,
+  wasmGreet
+} from '../wasm/index';
 
 interface WorkerData {
   csvContent?: string;
   input?: string;
   count?: number;
+  limit?: number;
+  iterations?: number;
 }
 
 export interface WorkerMessage {
   id: string;
-  type: 'process_csv' | 'process_simple' | 'fibonacci' | 'greet';
+  type: 'process_csv' | 'process_simple' | 'fibonacci' | 'greet' | 'calculate_primes' | 'monte_carlo_pi' | 'matrix_multiply';
   data: WorkerData;
 }
 
@@ -25,36 +31,20 @@ export interface WorkerResponse {
   performance?: number;
 }
 
-let isInitialized = false;
-
-// Initialize WASM module
-async function initializeWasm(): Promise<void> {
-  if (!isInitialized) {
-    try {
-      await init();
-      isInitialized = true;
-      console.log('WASM module initialized successfully');
-    } catch (error) {
-      console.error('Failed to initialize WASM module:', error);
-      throw error;
-    }
-  }
-}
-
 self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
   const { id, type, data } = event.data;
   const startTime = performance.now();
 
   try {
-    // Ensure WASM is initialized
-    await initializeWasm();
+    // Ensure WASM is initialized (using singleton pattern from index.ts)
+    await initWasm();
 
     let result: unknown;
 
     switch (type) {
       case 'greet': {
-        greet();
-        result = 'Greeting sent!';
+        await wasmGreet();
+        result = 'Greeting sent from WASM!';
         break;
       }
 
@@ -62,7 +52,7 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
         if (!data.csvContent) {
           throw new Error('CSV content is required');
         }
-        result = process_csv_data(data.csvContent);
+        result = await wasmProcessCsvData(data.csvContent);
         if (!result) {
           throw new Error('No valid data found in CSV');
         }
@@ -73,7 +63,7 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
         if (!data.input) {
           throw new Error('Input data is required');
         }
-        result = process_simple_data(data.input);
+        result = await wasmProcessSimpleData(data.input);
         if (typeof result === 'string') {
           throw new Error(result);
         }
@@ -84,11 +74,49 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
         if (data.count === undefined) {
           throw new Error('Count is required for fibonacci calculation');
         }
-        const fibNumbers = calculate_fibonacci(data.count);
+        const fibNumbers = await wasmCalculateFibonacci(data.count);
         result = {
           numbers: fibNumbers,
           count: data.count,
           last_value: fibNumbers[fibNumbers.length - 1]
+        };
+        break;
+      }
+
+      case 'calculate_primes': {
+        if (data.limit === undefined) {
+          throw new Error('Limit is required for prime number calculation');
+        }
+        const primes = await wasmCalculatePrimes(data.limit);
+        result = {
+          primes: primes,
+          count: primes.length,
+          limit: data.limit,
+          largest_prime: primes[primes.length - 1]
+        };
+        break;
+      }
+
+      case 'monte_carlo_pi': {
+        if (data.iterations === undefined) {
+          throw new Error('Iterations count is required for Monte Carlo PI calculation');
+        }
+        const piEstimate = await wasmMonteCarloPI(data.iterations);
+        result = {
+          pi_estimate: piEstimate,
+          iterations: data.iterations,
+          accuracy: Math.abs(piEstimate - Math.PI),
+          error_percentage: (Math.abs(piEstimate - Math.PI) / Math.PI) * 100
+        };
+        break;
+      }
+
+      case 'matrix_multiply': {
+        const matrixResult = await wasmMatrixMultiplyDemo();
+        result = {
+          result_matrix: matrixResult,
+          dimensions: `${matrixResult.length}x${matrixResult[0]?.length || 0}`,
+          operation: '2x3 matrix × 3x2 matrix'
         };
         break;
       }

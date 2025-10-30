@@ -3,17 +3,9 @@ use serde::{Serialize, Deserialize};
 use js_sys::Array;
 
 mod utils;
-use utils::*;
-
-// When the `wee_alloc` feature is enabled, use `wee_alloc` as the global allocator.
-#[cfg(feature = "wee_alloc")]
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
 extern "C" {
-    fn alert(s: &str);
-    
     #[wasm_bindgen(js_namespace = console)]
     fn log(s: &str);
 }
@@ -42,7 +34,7 @@ pub struct ProcessResult {
 
 #[wasm_bindgen]
 pub fn greet() {
-    alert("Hello, rust-hackathon-2025!");
+    console_log!("👋 Hello from Rust WebAssembly! WASM module is working correctly!");
 }
 
 #[wasm_bindgen]
@@ -185,4 +177,74 @@ fn process_numbers(data: &[f64]) -> Vec<f64> {
     data.iter()
         .map(|&x| (x - min) / range)
         .collect()
+}
+
+// Additional mathematical functions for performance testing
+#[wasm_bindgen]
+pub fn calculate_prime_numbers(limit: u32) -> JsValue {
+    let start_time = js_sys::Date::now();
+    
+    console_log!("Calculating prime numbers up to {}", limit);
+    
+    let primes = utils::calculate_prime_numbers(limit);
+    
+    let end_time = js_sys::Date::now();
+    console_log!("Prime calculation completed in {:.2}ms", end_time - start_time);
+    
+    let array = Array::new();
+    for prime in primes {
+        array.push(&JsValue::from_f64(prime as f64));
+    }
+    
+    array.into()
+}
+
+#[wasm_bindgen]
+pub fn monte_carlo_pi(iterations: u32) -> JsValue {
+    let start_time = js_sys::Date::now();
+    
+    console_log!("Calculating PI using {} iterations", iterations);
+    
+    let pi_estimate = utils::monte_carlo_pi(iterations);
+    
+    let end_time = js_sys::Date::now();
+    console_log!("Monte Carlo PI calculation completed in {:.2}ms", end_time - start_time);
+    
+    JsValue::from_f64(pi_estimate)
+}
+
+#[wasm_bindgen]
+pub fn matrix_multiply_demo() -> JsValue {
+    let start_time = js_sys::Date::now();
+    
+    // Create sample matrices for demonstration
+    let matrix_a = vec![
+        vec![1.0, 2.0, 3.0],
+        vec![4.0, 5.0, 6.0],
+    ];
+    
+    let matrix_b = vec![
+        vec![7.0, 8.0],
+        vec![9.0, 10.0],
+        vec![11.0, 12.0],
+    ];
+    
+    console_log!("Multiplying 2x3 and 3x2 matrices");
+    
+    let result = utils::matrix_multiply(&matrix_a, &matrix_b);
+    
+    let end_time = js_sys::Date::now();
+    console_log!("Matrix multiplication completed in {:.2}ms", end_time - start_time);
+    
+    // Convert result to JS array
+    let js_array = Array::new();
+    for row in result {
+        let js_row = Array::new();
+        for val in row {
+            js_row.push(&JsValue::from_f64(val));
+        }
+        js_array.push(&js_row);
+    }
+    
+    js_array.into()
 }
