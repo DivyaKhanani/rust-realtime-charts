@@ -1,0 +1,16 @@
+{
+  "name": "rustify-hackathon-2025",
+  "scripts": {
+    "build": "./build.sh",
+    "dev": "cd client && npm run dev",
+    "build:wasm": "cd rust-core && ./build.sh",
+    "build:client": "cd client && npm run build",
+    "preview": "cd client && npm run preview",
+    "lint": "cd client && npm run lint",
+    "clean": "rm -rf client/src/wasm/pkg client/dist rust-core/target",
+    "install": "cd client && npm install"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  }
+}
