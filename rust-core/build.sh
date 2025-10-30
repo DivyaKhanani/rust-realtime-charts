@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+# Note: macOS linking fix is now set globally in shell profile
+
 echo "🦀 Building Rust WebAssembly module..."
 
 # Ensure we're in the rust-core directory
@@ -14,7 +16,8 @@ fi
 
 # Build the WebAssembly module
 echo "🔨 Running wasm-pack build..."
-wasm-pack build --target web --out-dir ../client/src/wasm --dev
+# Build optimized WASM
+wasm-pack build --target web --out-dir ../client/src/wasm/package --release
 
 echo "✅ WASM build complete! Output saved to ../client/src/wasm"
 

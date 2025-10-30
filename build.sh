@@ -1,63 +1,122 @@
 #!/bin/bash
+
 set -e
+
+# Note: macOS linking fix is now set globally in shell profile
+
+# 🚀 Production Build Script for Rust + React + WASM Application
 
 echo "🚀 Building Rust + React + WASM Application"
 
 # Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
+
+echo "🚀 Production Build: Rust → WASM → React"RED='\033[0;31m'
+
+echo ""GREEN='\033[0;32m'
+
 YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
 
-# Function to print colored output
+# Build Rust WebAssembly moduleNC='\033[0m' # No Color
+
+echo "🦀 Building Rust WebAssembly module..."
+
+cd rust-core# Function to print colored output
+
 print_status() {
-    echo -e "${GREEN}[INFO]${NC} $1"
-}
 
-print_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
-}
+# Check if wasm-pack is installed    echo -e "${GREEN}[INFO]${NC} $1"
 
-print_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
+if ! command -v wasm-pack &> /dev/null; then}
 
-# Check if we're in the root directory
-if [ ! -f "rust-core/Cargo.toml" ] || [ ! -f "client/package.json" ]; then
-    print_error "This script must be run from the project root directory"
-    exit 1
-fi
+    echo "❌ wasm-pack is not installed."
 
-# Check if wasm-pack is installed
-if ! command -v wasm-pack &> /dev/null; then
-    print_warning "wasm-pack not found. Installing..."
-    curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-    
+    echo "📦 Install it with: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh"print_warning() {
+
+    echo "⚠️  Using JavaScript fallback instead."    echo -e "${YELLOW}[WARNING]${NC} $1"
+
+    cd ../client}
+
+else
+
+    # Build with wasm-pack for productionprint_error() {
+
+    if wasm-pack build --target web --out-dir ../client/src/wasm --out-name rust_core --release; then    echo -e "${RED}[ERROR]${NC} $1"
+
+        echo "✅ WASM module built successfully!"}
+
+        
+
+        # Copy WASM file to public directory# Check if we're in the root directory
+
+        if [ -f "../client/src/wasm/rust_core_bg.wasm" ]; thenif [ ! -f "rust-core/Cargo.toml" ] || [ ! -f "client/package.json" ]; then
+
+            cp "../client/src/wasm/rust_core_bg.wasm" "../client/public/"    print_error "This script must be run from the project root directory"
+
+            echo "📦 WASM file ready for production"    exit 1
+
+        fifi
+
+    else
+
+        echo "⚠️  WASM build failed. Using JavaScript fallback."# Check if wasm-pack is installed
+
+    fiif ! command -v wasm-pack &> /dev/null; then
+
+        print_warning "wasm-pack not found. Installing..."
+
+    cd ../client    curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+fi    
+
     # Add to PATH for current session
-    export PATH="$HOME/.cargo/bin:$PATH"
-    
-    if ! command -v wasm-pack &> /dev/null; then
+
+# Install and build client    export PATH="$HOME/.cargo/bin:$PATH"
+
+echo ""    
+
+echo "⚛️  Building React client..."    if ! command -v wasm-pack &> /dev/null; then
+
         print_error "Failed to install wasm-pack"
-        exit 1
-    fi
+
+if [ ! -d "node_modules" ]; then        exit 1
+
+    echo "📦 Installing dependencies..."    fi
+
+    npm installfi
+
 fi
 
 # Check if Node.js is installed
-if ! command -v npm &> /dev/null; then
-    print_error "Node.js/npm not found. Please install Node.js first."
-    exit 1
-fi
 
-print_status "Building Rust WebAssembly module..."
-cd rust-core
+if npm run build; thenif ! command -v npm &> /dev/null; then
 
-# Clean previous builds
-rm -rf ../client/src/wasm/pkg 2>/dev/null || true
+    echo "✅ Client built successfully!"    print_error "Node.js/npm not found. Please install Node.js first."
 
-# Build WASM module
-if ! wasm-pack build --target web --out-dir ../client/src/wasm --dev; then
+    echo ""    exit 1
+
+    echo "🎉 Production build complete!"fi
+
+    echo "📁 Output: client/dist/"
+
+    echo ""print_status "Building Rust WebAssembly module..."
+
+    echo "🚀 Deploy with:"cd rust-core
+
+    echo "   vercel --prod"
+
+    echo "   or serve client/dist/"# Clean previous builds
+
+elserm -rf ../client/src/wasm/pkg 2>/dev/null || true
+
+    echo "❌ Client build failed"
+
+    exit 1# Build WASM module
+
+fiif ! wasm-pack build --target web --out-dir ../client/src/wasm --dev; then
+
     print_warning "WASM build failed. Using mock implementation."
-    print_status "This is normal if you don't have the proper Rust toolchain setup."
+
+cd ..    print_status "This is normal if you don't have the proper Rust toolchain setup."
     print_status "The application will still work with JavaScript fallbacks."
 else
     print_status "✅ WASM module built successfully!"

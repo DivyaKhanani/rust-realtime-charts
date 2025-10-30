@@ -1,17 +1,16 @@
 {
   "name": "rustify-hackathon-2025",
   "scripts": {
-    "build": "./build.sh",
-    "dev": "cd client && npm run dev",
-    "build:wasm": "cd rust-core && ./build.sh",
+    "dev": "concurrently \"npm run dev:rust\" \"npm run dev:client\" --names \"🦀RUST,⚛️CLIENT\" --prefix-colors \"red,blue\" --kill-others-on-fail",
+    "dev:rust": "cd rust-core && ./dev.sh",
+    "dev:client": "sleep 5 && cd client && npm run dev",
+    "build": "npm run build:rust && npm run build:client",
+    "build:rust": "cd rust-core && ./build.sh",
     "build:client": "cd client && npm run build",
-    "preview": "cd client && npm run preview",
-    "lint": "cd client && npm run lint",
-    "clean": "rm -rf client/dist client/node_modules rust-core/target client/src/wasm/*.js client/src/wasm/*.wasm client/src/wasm/*.d.ts client/src/wasm/package.json .vercel",
-    "clean:wasm": "rm -rf client/src/wasm/*.js client/src/wasm/*.wasm client/src/wasm/*.d.ts client/src/wasm/package.json",
-    "install": "cd client && npm install"
+    "clean": "rm -rf client/dist client/node_modules rust-core/target client/src/wasm/package target node_modules .vercel"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0"
+    "@types/node": "^20.0.0",
+    "concurrently": "^8.2.2"
   }
 }
