@@ -180,8 +180,8 @@ export async function initWasm(): Promise<void> {
     const wasmInit = await import("./package/rust_core.js");
     const wasmBinary = await import("./package/rust_core_bg.wasm?url");
     
-    // Initialize the WASM module with the imported binary
-    await wasmInit.default(wasmBinary.default);
+    // Initialize the WASM module with the imported binary (using modern object-based API)
+    await wasmInit.default({ module_or_path: wasmBinary.default });
     
     // Store the module for function calls
     wasmModule = wasmInit;
