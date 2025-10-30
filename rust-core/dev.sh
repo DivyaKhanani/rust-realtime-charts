@@ -5,7 +5,8 @@
 
 set -e
 
-# Note: macOS linking fix is now set globally in shell profile
+# macOS environment setup for Rust compilation
+export LIBRARY_PATH="$LIBRARY_PATH:$(xcrun --show-sdk-path)/usr/lib"
 
 # Colors for output
 RED='\033[0;31m'
@@ -41,15 +42,31 @@ build_wasm() {
 echo -e "${BLUE}🔨 Initial WASM build...${NC}"
 build_wasm
 
-# Check if cargo-watch is installed
-if ! command -v cargo-watch &> /dev/null; then
-    echo -e "${YELLOW}📦 Installing cargo-watch for file watching...${NC}"
-    cargo install cargo-watch
+# Use fswatch if available, otherwise fallback to simple polling
+if command -v fswatch &> /dev/null; then
+    echo -e "${GREEN}🔄 Using fswatch for file watching${NC}"
+    echo -e "${YELLOW}Press Ctrl+C to stop${NC}"
+    echo ""
+    
+    # Use fswatch - efficient file system events
+    fswatch -o src/ | while read f; do
+        build_wasm
+    done
+else
+    echo -e "${BLUE}🔄 Using polling-based file watcher${NC}"
+    echo -e "${YELLOW}Press Ctrl+C to stop${NC}"
+    echo ""
+
+    # Simple polling fallback
+    last_mod_time=$(find src -name "*.rs" -exec stat -f "%m" {} \; | sort -n | tail -1)
+
+    while true; do
+        sleep 2
+        current_mod_time=$(find src -name "*.rs" -exec stat -f "%m" {} \; | sort -n | tail -1)
+        
+        if [ "$current_mod_time" != "$last_mod_time" ]; then
+            build_wasm
+            last_mod_time=$current_mod_time
+        fi
+    done
 fi
-
-# Start watching Rust files
-echo -e "${BLUE}👀 Watching for Rust file changes...${NC}"
-echo -e "${YELLOW}Press Ctrl+C to stop${NC}"
-echo ""
-
-cargo watch -w src -s "echo '⚡ Change detected...' && wasm-pack build --target web --out-dir ../client/src/wasm/package --out-name rust_core && echo '✅ WASM updated!'"
