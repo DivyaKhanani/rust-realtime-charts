@@ -1,13 +1,11 @@
 {
   "name": "rustify-hackathon-2025",
   "scripts": {
-    "dev": "concurrently \"npm run dev:rust\" \"npm run dev:client\" --names \"🦀RUST,⚛️CLIENT\" --prefix-colors \"red,blue\" --kill-others-on-fail",
-    "dev:rust": "cd rust-core && ./dev.sh",
-    "dev:client": "sleep 5 && cd client && npm run dev",
-    "build": "npm run build:rust && npm run build:client",
-    "build:rust": "cd rust-core && ./build.sh",
-    "build:client": "cd client && npm run build",
-    "clean": "rm -rf client/dist client/node_modules rust-core/target client/src/wasm/package target node_modules"
+    "build:wasm": "node build-wasm.js",
+
+    "dev": "npm run build:wasm",
+    "client": "cd client && npm run dev",
+    "dev:watch": "concurrently -n \"🦀RUST,⚛️CLIENT\" -c \"red,blue\" \"npm run dev\" \"npm run client\""
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

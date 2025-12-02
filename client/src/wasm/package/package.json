@@ -1,14 +1,14 @@
 {
-  "name": "rust_core",
+  "name": "rw-lttb",
   "type": "module",
   "version": "0.1.0",
   "files": [
-    "rust_core_bg.wasm",
-    "rust_core.js",
-    "rust_core.d.ts"
+    "rw_lttb_bg.wasm",
+    "rw_lttb.js",
+    "rw_lttb.d.ts"
   ],
-  "main": "rust_core.js",
-  "types": "rust_core.d.ts",
+  "main": "rw_lttb.js",
+  "types": "rw_lttb.d.ts",
   "sideEffects": [
     "./snippets/*"
   ]

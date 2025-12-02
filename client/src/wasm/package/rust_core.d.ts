@@ -1,20 +1,23 @@
 /* tslint:disable */
 /* eslint-disable */
-export function greet(): string;
-export function add(a: number, b: number): number;
+
+/**
+ * Exposed API: generate N pairs (e.g. 1_000_000), downsample to target pairs (e.g. 2000),
+ * returns Float32Array [x0,y0,...] (downsampled).
+ */
+export function generate_and_downsample(total_pairs: number, target_pairs: number, seed: number | null | undefined, bias: number): Float32Array;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly greet: () => [number, number];
-  readonly add: (a: number, b: number) => number;
+  readonly generate_and_downsample: (a: number, b: number, c: number, d: number) => any;
   readonly __wbindgen_externrefs: WebAssembly.Table;
-  readonly __wbindgen_free: (a: number, b: number, c: number) => void;
   readonly __wbindgen_start: () => void;
 }
 
 export type SyncInitInput = BufferSource | WebAssembly.Module;
+
 /**
 * Instantiates the given `module`, which can either be bytes or
 * a precompiled `WebAssembly.Module`.
