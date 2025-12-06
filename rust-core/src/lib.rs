@@ -1,15 +1,15 @@
-mod utils;
+mod engine;
 mod generator;
 mod lttb;
-mod engine;
+mod utils;
 
-use wasm_bindgen::prelude::*;
 use js_sys::Float32Array;
+use wasm_bindgen::prelude::*;
 
+use engine::chart_engine::ChartEngine;
 use generator::random_walk::RandomWalkGenerator;
 use generator::simple_walk::gen_random_walk_vec;
 use lttb::lttb_downsample;
-use engine::chart_engine::ChartEngine;
 
 #[wasm_bindgen]
 pub fn init_panic_hook() {

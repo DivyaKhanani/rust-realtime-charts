@@ -121,29 +121,6 @@ const App = () => {
                   </Button>
                 </div>
               </div>
-
-              <div className="flex-1 w-full lg:w-auto animate-in fade-in slide-in-from-right-4 duration-1000 delay-200">
-                <div className="relative rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 shadow-2xl">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="p-3 rounded-lg bg-blue-500/10 text-blue-500">
-                      <Zap className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <div className="font-semibold">Performance Metrics</div>
-                      <div className="text-xs text-muted-foreground">
-                        Real-time WASM Bridge
-                      </div>
-                    </div>
-                    <div className="ml-auto text-right">
-                      <div className="text-2xl font-bold font-mono">60 FPS</div>
-                      <div className="text-xs text-green-500">Stable</div>
-                    </div>
-                  </div>
-                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                    <div className="h-full bg-blue-500 w-[85%] animate-pulse" />
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>

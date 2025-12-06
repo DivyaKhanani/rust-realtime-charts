@@ -4,10 +4,10 @@
 let wasm: any = null;
 let engine: any = null; // ChartEngine instance
 let running = false;
-let batchSize = 10000; // Smaller batches for smooth continuous movement
+let batchSize = 20000; // Smaller batches for smooth continuous movement
 let targetPairs = 2000;
 let maxPoints = 1_000_000; // Max points to keep in Rust memory
-let intervalMs = 100;
+let intervalMs = 20;
 let seed: number | null = 12345;
 let drift = 0.005; // 0.5% drift per tick - strong upward trend
 let volatility = 0.025; // 2.5% volatility per tick for realistic fluctuations
@@ -63,6 +63,7 @@ self.onmessage = async (ev: MessageEvent) => {
 
   if (m.type === 'updateParams') {
     if (engine) {
+      if (m.batchSize !== undefined) batchSize = m.batchSize;
       if (m.drift !== undefined) drift = m.drift;
       if (m.volatility !== undefined) volatility = m.volatility;
       engine.set_params(drift, volatility);
