@@ -1,0 +1,14 @@
+{
+  "name": "rustify-hackathon-2025",
+  "scripts": {
+    "build:wasm": "node build-wasm.js",
+
+    "dev": "npm run build:wasm",
+    "client": "cd client && npm run dev",
+    "dev:watch": "concurrently -n \"🦀RUST,⚛️CLIENT\" -c \"red,blue\" \"npm run dev\" \"npm run client\""
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "concurrently": "^8.2.2"
+  }
+}

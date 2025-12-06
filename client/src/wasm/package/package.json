@@ -1,0 +1,15 @@
+{
+  "name": "rw-lttb",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "rw_lttb_bg.wasm",
+    "rw_lttb.js",
+    "rw_lttb.d.ts"
+  ],
+  "main": "rw_lttb.js",
+  "types": "rw_lttb.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
