@@ -1,7 +1,7 @@
 import "./App.css";
 import { useState, useEffect } from "react";
 import ChartRendererNew from "./components/ChartRendererNew";
-import { Activity, Zap, Moon, Sun, Github, ArrowRight } from "lucide-react";
+import { Activity, Zap, Moon, Sun, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const App = () => {
@@ -56,27 +56,6 @@ const App = () => {
                   </h1>
                 </div>
               </div>
-
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-full hover:bg-primary/10 transition-colors"
-                  onClick={() => window.open("https://github.com", "_blank")}>
-                  <Github className="h-5 w-5" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={toggleDarkMode}
-                  className="rounded-full border-primary/20 hover:bg-primary/10 hover:border-primary/50 transition-all">
-                  {darkMode ? (
-                    <Sun className="h-5 w-5" />
-                  ) : (
-                    <Moon className="h-5 w-5" />
-                  )}
-                </Button>
-              </div>
             </div>
           </div>
         </header>
@@ -86,14 +65,6 @@ const App = () => {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
               <div className="space-y-6 max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-                  </span>
-                  Live System Status
-                </div>
-
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground">
                   Real-Time Analytics <br />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-violet-500">
@@ -106,20 +77,6 @@ const App = () => {
                   leveraging WebAssembly and Rust for ultra-low latency
                   processing.
                 </p>
-
-                <div className="flex flex-wrap gap-4 pt-2">
-                  <Button
-                    size="lg"
-                    className="rounded-full px-8 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all">
-                    Get Started <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="rounded-full px-8 border-primary/20 hover:bg-primary/5">
-                    View Documentation
-                  </Button>
-                </div>
               </div>
             </div>
           </div>

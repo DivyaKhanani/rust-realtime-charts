@@ -875,7 +875,6 @@ export default function ChartRenderer() {
             <Activity className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{fps} FPS</div>
             <div className="text-2xl font-bold text-foreground">
               Render FPS: {renderFps}
             </div>
