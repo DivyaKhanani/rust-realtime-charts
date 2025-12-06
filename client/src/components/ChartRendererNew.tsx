@@ -5,9 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, BarChart3, TrendingUp, Zap } from "lucide-react";
 
 const DOWNSAMPLED_POINTS = 2000;
-const BATCH_SIZE = 10000; // Generate 100 points per batch for smooth continuous movement
+// const BATCH_SIZE = 10000;
 const DEFAULT_INTERVAL_MS = 100;
-const TOTAL_TARGET_POINTS = 1_000_000; // 1 million target points
+// const TOTAL_TARGET_POINTS = 1_000_000; // 1 million target points
 
 type GlCanvasElem = HTMLCanvasElement & {
   startSharedLoop?: () => void;
@@ -32,7 +32,19 @@ export default function ChartRenderer() {
 
   // Worker refs
   const workerRef = useRef<Worker | null>(null);
+  const sabWorkerRef = useRef<Worker | null>(null);
   const isRunningRef = useRef(false);
+
+  const [batchSize, setBatchSize] = useState(5000); // default
+  // SharedArrayBuffer refs for SAB worker
+  const sabDataRef = useRef<Float32Array | null>(null);
+  const sabMetaRef = useRef<Int32Array | null>(null);
+  const sabRafRef = useRef<number | null>(null);
+  const sabTotalPointsRef = useRef(0);
+
+  const renderFpsCountRef = useRef(0);
+  const lastRenderFpsTimeRef = useRef(performance.now());
+  const [renderFps, setRenderFps] = useState(0);
 
   // Stream parameters
   const [drift, setDrift] = useState(0.005); // 0.5% drift per tick - strong upward trend
@@ -40,6 +52,7 @@ export default function ChartRenderer() {
   const [updateRate, setUpdateRate] = useState(DEFAULT_INTERVAL_MS);
   const [isRunning, setIsRunning] = useState(false);
   const [fps, setFps] = useState(0);
+  const pointsPerSecond = Math.floor((batchSize / updateRate) * 1000);
 
   // FPS counter
   const fpsCountRef = useRef(0);
@@ -150,6 +163,31 @@ export default function ChartRenderer() {
     resizeCanvases();
     updateGLUniforms();
     renderGL();
+  }
+
+  function startRenderLoop() {
+    let rafId = 0;
+
+    const loop = () => {
+      // --- FPS CALC ---
+      renderFpsCountRef.current++;
+      const now = performance.now();
+      if (now - lastRenderFpsTimeRef.current >= 1000) {
+        setRenderFps(renderFpsCountRef.current);
+        renderFpsCountRef.current = 0;
+        lastRenderFpsTimeRef.current = now;
+      }
+
+      // --- Render ---
+      renderGL();
+      drawOverlay();
+
+      rafId = requestAnimationFrame(loop);
+    };
+
+    rafId = requestAnimationFrame(loop);
+
+    return () => cancelAnimationFrame(rafId);
   }
 
   function resizeCanvases() {
@@ -508,15 +546,17 @@ export default function ChartRenderer() {
   // ---------- Init WebGL ----------
   useEffect(() => {
     initWebGL();
+
+    const stopLoop = startRenderLoop();
+
     return () => {
+      stopLoop();
       const st = glStateRef.current;
       if (st?.gl) {
         try {
           st.gl.deleteBuffer(st.buffer);
           st.gl.deleteProgram(st.program);
-        } catch (e) {
-          // ignore
-        }
+        } catch (e) {}
       }
       glStateRef.current = null;
     };
@@ -555,13 +595,117 @@ export default function ChartRenderer() {
       // Initialize worker
       w.postMessage({
         type: "init",
-        batchSize: BATCH_SIZE,
+        batchSize,
         targetPairs: DOWNSAMPLED_POINTS,
         intervalMs: updateRate,
         seed: 42,
         drift: drift,
         volatility: volatility,
       });
+
+      // --- Create and initialize SAB worker ---
+      // try {
+      //   const sab = new Worker(
+      //     new URL("../workers/rust_sab_worker.ts", import.meta.url),
+      //     { type: "module" }
+      //   );
+      //   sabWorkerRef.current = sab;
+
+      //   // Allocate SharedArrayBuffer sized for downsampled points (pairs * 2 floats)
+      //   const sabPairs = DOWNSAMPLED_POINTS;
+      //   const sabFloatLen = sabPairs * 2; // x,y pairs
+      //   const sabBuf = new SharedArrayBuffer(
+      //     Float32Array.BYTES_PER_ELEMENT * sabFloatLen
+      //   );
+      //   const sabMeta = new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT * 1);
+
+      //   sabDataRef.current = new Float32Array(sabBuf);
+      //   sabMetaRef.current = new Int32Array(sabMeta);
+
+      //   sab.onmessage = (ev: MessageEvent) => {
+      //     const msg = ev.data;
+      //     if (msg.type === "ready") {
+      //       console.log("[ChartRenderer] SAB worker ready");
+      //       return;
+      //     }
+      //     if (msg.type === "error") {
+      //       console.error(
+      //         "[ChartRenderer] SAB worker error:",
+      //         msg.error,
+      //         msg.details
+      //       );
+      //       handleStop();
+      //     }
+      //   };
+
+      //   sab.onerror = (err) => console.error("SAB worker error:", err);
+
+      //   sab.postMessage({
+      //     type: "init",
+      //     batchSize: 1000,
+      //     targetPairs: DOWNSAMPLED_POINTS,
+      //     intervalMs: updateRate,
+      //     seed: 42,
+      //     drift: drift,
+      //     volatility: volatility,
+      //     sab: sabBuf,
+      //     meta: sabMeta,
+      //   });
+
+      //   // attach RAF poll loop to read SAB changes
+      //   const startSharedLoop = () => {
+      //     if (sabRafRef.current != null) return;
+
+      //     const loop = () => {
+      //       try {
+      //         const meta = sabMetaRef.current;
+      //         const data = sabDataRef.current;
+
+      //         if (meta && data) {
+      //           // READ PAIRS WITH MEMORY FENCE
+      //           const pairs = Atomics.load(meta, 0);
+
+      //           // No new data → skip
+      //           if (pairs > 0) {
+      //             const used = Math.min(pairs * 2, data.length);
+
+      //             // SAFER COPY — prevents race tearing
+      //             const copied = data.slice(0, used);
+
+      //             // Update chart
+      //             sabTotalPointsRef.current = pairs;
+      //             updateData(copied, sabTotalPointsRef.current);
+
+      //             // MARK CONSUMED (memory fence)
+      //             Atomics.store(meta, 0, 0);
+      //           }
+      //         }
+      //       } catch (e) {
+      //         // ignore transient reads
+      //       }
+
+      //       sabRafRef.current = requestAnimationFrame(loop);
+      //     };
+
+      //     sabRafRef.current = requestAnimationFrame(loop);
+      //   };
+
+      //   const stopSharedLoop = () => {
+      //     if (sabRafRef.current != null) {
+      //       cancelAnimationFrame(sabRafRef.current);
+      //       sabRafRef.current = null;
+      //     }
+      //   };
+
+      //   // Expose start/stop helpers on canvas element so controls can trigger
+      //   const canvas = glCanvasRef.current as GlCanvasElem | null;
+      //   if (canvas) {
+      //     canvas.startSharedLoop = startSharedLoop;
+      //     canvas.stopSharedLoop = stopSharedLoop;
+      //   }
+      // } catch (err) {
+      //   console.warn("Failed to create SAB worker:", err);
+      // }
     } catch (err) {
       console.error("Failed to create worker:", err);
     }
@@ -569,6 +713,15 @@ export default function ChartRenderer() {
     return () => {
       workerRef.current?.terminate();
       workerRef.current = null;
+      // terminate sab worker and stop RAF if present
+      try {
+        const canvas = glCanvasRef.current as GlCanvasElem | null;
+        if (canvas && canvas.stopSharedLoop) canvas.stopSharedLoop();
+      } catch (e) {}
+      sabWorkerRef.current?.terminate();
+      sabWorkerRef.current = null;
+      sabDataRef.current = null;
+      sabMetaRef.current = null;
     };
   }, []);
 
@@ -587,11 +740,22 @@ export default function ChartRenderer() {
       setIsRunning(true);
       workerRef.current.postMessage({ type: "start" });
     }
+    if (sabWorkerRef.current) {
+      sabWorkerRef.current.postMessage({ type: "start" });
+      // begin RAF poll loop
+      const canvas = glCanvasRef.current as GlCanvasElem | null;
+      if (canvas && canvas.startSharedLoop) canvas.startSharedLoop();
+    }
   }
 
   function handleStop() {
     if (workerRef.current) {
       workerRef.current.postMessage({ type: "stop" });
+    }
+    if (sabWorkerRef.current) {
+      sabWorkerRef.current.postMessage({ type: "stop" });
+      const canvas = glCanvasRef.current as GlCanvasElem | null;
+      if (canvas && canvas.stopSharedLoop) canvas.stopSharedLoop();
     }
     isRunningRef.current = false;
     setIsRunning(false);
@@ -602,6 +766,11 @@ export default function ChartRenderer() {
     console.log("[Chart Renderer] 🔄 Resetting all data...");
     if (workerRef.current) {
       workerRef.current.postMessage({ type: "reset" });
+    }
+    if (sabWorkerRef.current) {
+      sabWorkerRef.current.postMessage({ type: "reset" });
+      // zero meta
+      if (sabMetaRef.current) Atomics.store(sabMetaRef.current, 0, 0);
     }
     dataBufferRef.current = new Float32Array(0);
     dataCountRef.current = 0;
@@ -622,6 +791,9 @@ export default function ChartRenderer() {
         drift: value,
       });
     }
+    if (sabWorkerRef.current) {
+      sabWorkerRef.current.postMessage({ type: "updateParams", drift: value });
+    }
   }
 
   function handleVolatilityChange(value: number) {
@@ -632,12 +804,24 @@ export default function ChartRenderer() {
         volatility: value,
       });
     }
+    if (sabWorkerRef.current) {
+      sabWorkerRef.current.postMessage({
+        type: "updateParams",
+        volatility: value,
+      });
+    }
   }
 
   function handleUpdateRateChange(value: number) {
     setUpdateRate(value);
     if (workerRef.current) {
       workerRef.current.postMessage({
+        type: "updateParams",
+        intervalMs: value,
+      });
+    }
+    if (sabWorkerRef.current) {
+      sabWorkerRef.current.postMessage({
         type: "updateParams",
         intervalMs: value,
       });
@@ -658,6 +842,29 @@ export default function ChartRenderer() {
         onReset={handleReset}
       />
 
+      <div className="w-full p-4 bg-card rounded-lg border border-border/40">
+        <label className="text-sm text-muted-foreground font-medium">
+          Data points: {pointsPerSecond}
+        </label>
+        <input
+          type="range"
+          min={100}
+          max={100000}
+          step={100}
+          value={batchSize}
+          onChange={(e) => {
+            const val = Number(e.target.value);
+            setBatchSize(val);
+            // send new batch size to worker
+            workerRef.current?.postMessage({
+              type: "updateParams",
+              batchSize: val,
+            });
+          }}
+          className="w-full mt-2"
+        />
+      </div>
+
       {/* Stats Cards */}
       <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
         <Card className="border border-border/50 bg-card/50 backdrop-blur-sm shadow-lg hover:bg-card/80 transition-colors">
@@ -668,7 +875,9 @@ export default function ChartRenderer() {
             <Activity className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{fps} FPS</div>
+            <div className="text-2xl font-bold text-foreground">
+              Render FPS: {renderFps}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">
               Rendering performance
             </p>
@@ -691,29 +900,6 @@ export default function ChartRenderer() {
             </p>
           </CardContent>
         </Card>
-
-        <Card className="border border-border/50 bg-card/50 backdrop-blur-sm shadow-lg hover:bg-card/80 transition-colors">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Generated
-            </CardTitle>
-            <Zap className="h-4 w-4 text-yellow-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">
-              {totalGeneratedPointsRef.current.toLocaleString()}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Raw data points (
-              {(
-                (totalGeneratedPointsRef.current / TOTAL_TARGET_POINTS) *
-                100
-              ).toFixed(1)}
-              %)
-            </p>
-          </CardContent>
-        </Card>
-
         <Card className="border border-border/50 bg-card/50 backdrop-blur-sm shadow-lg hover:bg-card/80 transition-colors">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">

@@ -1,5 +1,5 @@
-use wasm_bindgen::prelude::*;
 use js_sys::Float32Array;
+use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 pub struct RandomWalkGenerator {
@@ -14,7 +14,7 @@ pub struct RandomWalkGenerator {
 impl RandomWalkGenerator {
     #[wasm_bindgen(constructor)]
     pub fn new(bias: Option<f64>) -> Self {
-        let bias = bias.unwrap_or(0.0001);
+        let bias = bias.unwrap_or(0.001);
         let seed = (js_sys::Date::now() as i32) % 2147483647;
         let seed = if seed <= 0 { seed + 2147483646 } else { seed };
 
